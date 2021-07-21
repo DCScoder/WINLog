@@ -1,7 +1,7 @@
 ###################################################################################
 #
 #    Script:    WINLog.ps1
-#    Version:   1.0
+#    Version:   1.1
 #    Author:    Dan Saunders
 #    Contact:   dcscoder@gmail.com
 #    Purpose:   Windows Log Preservation (PowerShell)
@@ -23,27 +23,45 @@
 ###################################################################################
 
 $script = "WINLog_"
-$version = "v1.0"
+$version = "v1.1"
 
 ########## Startup ##########
 
-Write-Host "`n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Script / Skript: WINLog.ps1 - $version - Author / Autor: Dan Saunders dcscoder@gmail.com
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-
 Write-Host "
+
+          ___      ____      ___ ________  ____    __  __
+          \  \    /    \    /  /|__    __||    \  |  ||  |
+           \  \  /  /\  \  /  /    |  |   |     \ |  ||  |      ______   ________
+            \  \/  /  \  \/  /   __|  |__ |  |\  \|  ||  |____ /  __  \ /  ___   \
+             \____/    \____/   |________||__| \_____||_______|\______/ \_____   |
+                                                                         _____|  |
+                                                                        |________/
+
+
+Script / Skript: WINLog.ps1 - $version - Author / Autor: Dan Saunders dcscoder@gmail.com`n`n"
+
+Write-Host "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Please Note:
 
 Hi $env:USERNAME, script running on $env:ComputerName, please do not touch!
 
 Bitte beachten Sie:
 
-Hallo $env:USERNAME, skript läuft auf $env:ComputerName, bitte nicht berühren!" -ForegroundColor yellow -BackgroundColor black
+Hallo $env:USERNAME, skript läuft auf $env:ComputerName, bitte nicht berühren!
 
-Write-Host "
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" -ForegroundColor yellow -BackgroundColor black
+
+# Check Priveleges
+$admin=[Security.Principal.WindowsIdentity]::GetCurrent()
+If ((New-Object Security.Principal.WindowsPrincipal $Admin).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator) -eq $FALSE)
+{
+    Write-Host "`n"
+    Write-Warning "You have insufficient permissions. Run this script with local Administrator priveleges."
+    Write-Warning "Sie haben unzureichende Berechtigungen. Führen Sie dieses Skript mit lokalen Administratorrechten aus."
+    Write-Host "`n"
+    exit
+}
 
 ########## Admin ##########
 
@@ -60,7 +78,7 @@ New-Item $dst\$tri -ItemType Directory | Out-Null
 # Stream Events
 Start-Transcript $dst\$tri\WINLog.log -Append | Out-Null
 
-# Exchange Install Path
+# Exchange Install path
 function Get-ExchangeInstallPath {
     $p = (Get-ItemProperty -Path Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\ExchangeServer\v15\Setup -ErrorAction SilentlyContinue).MsiInstallPath
     if ($null -eq $p) {
